@@ -11,6 +11,9 @@ export const shortname = 'alphabeticwords'
 export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
   const text = create.record.text
 
+  // only top-level posts
+  if (create.record.reply) return false
+
   // only allow ASCII for simplicity
   if (!isASCII(text, true)) return false
 
