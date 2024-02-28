@@ -13,32 +13,60 @@ export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
   const text = create.record.text
 
   // only top-level posts
-  if (create.record.reply) return false
+  if (create.record.reply) {
+    // console.log("not a top-level post")
+    return false
+  }
 
   // filter out anything labelled as nsfw etc
   if (isSelfLabels(create.record.labels)) {
-    if (create.record.labels.values.some(v => v.val === 'porn' || v.val === 'sexual')) return false
+    if (create.record.labels.values.some(v => v.val === 'porn' || v.val === 'sexual')) {
+      // console.log("contains nsfw labels")
+      return false
+    }
   }
 
   // filter out nsfw etc hashtags
-  if (text.includes("#NSFW") || text.includes("#nsfw") || text.includes("#BDSM") || text.includes("#bdsm") || text.includes("#KINK") || text.includes("#kink")) return false
+  if (text.includes("#NSFW") || text.includes("#nsfw") || text.includes("#BDSM") || text.includes("#bdsm") || text.includes("#KINK") || text.includes("#kink")) {
+    // console.log("contains nsfw hashtags")
+    return false
+  }
 
   // only allow ASCII for simplicity
-  if (!isASCII(text, false)) return false
+  if (!isASCII(text, false)) {
+    // console.log("contains non-ASCII characters")
+    return false
+  }
 
   const words = text.toLowerCase().split(" ")
 
   // we only want sentences, not single words
-  if (words.length <= 1) return false
+  if (words.length <= 1) {
+    // console.log("single word")
+    return false
+  }
 
   // extract the first letter of each word, and lowercase for comparison
   const firstLetters = words.map(word => word.substring(0, 1).toLowerCase())
+
+  // ignore any posts starting with a symbol
+  if (!isAlphaNumeric(firstLetters[0])) {
+    // console.log("first word not alphanumeric")
+    return false
+  }
+
+  // ignore any posts where all words start with a symbol
+  if (firstLetters.every(fl => !isAlphaNumeric(fl))) {
+    // console.log("all words not alphanumeric")
+    return false
+  }
 
   // prepare another array with the letters sorted
   const sortedFirstLetters = [...firstLetters].sort()
 
   // check to see if all words are in alphabetical order
   for (var i = 0; i < firstLetters.length; ++i) {
+    // console.log("words not in alphabetical order")
     if (firstLetters[i] !== sortedFirstLetters[i]) return false
   }
 
@@ -100,5 +128,19 @@ export const handler = async (ctx: AppContext, params: QueryParams) => {
 }
 
 function isASCII(str: string, extended: boolean): boolean {
-  return (extended ? /^[\x00-\xFF]*$/ : /^[\x00-\x7F]*$/).test(str);
+  return (extended ? /^[\x00-\xFF]*$/ : /^[\x00-\x7F]*$/).test(str)
+}
+
+function isAlphaNumeric(str: string): boolean {
+  var code: number, i: number, len: number
+
+  for (i = 0, len = str.length; i < len; i++) {
+    code = str.charCodeAt(i)
+    if (!(code > 47 && code < 58) && // numeric (0-9)
+      !(code > 64 && code < 91) && // upper alpha (A-Z)
+      !(code > 96 && code < 123)) { // lower alpha (a-z)
+      return false
+    }
+  }
+  return true
 }
