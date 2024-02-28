@@ -31,13 +31,19 @@ export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
   // we only want sentences, not single words
   if (words.length <= 1) return false
 
-  const firstLetters = words.map(word => word.substring(0, 1))
+  // extract the first letter of each word, and lowercase for comparison
+  const firstLetters = words.map(word => word.substring(0, 1).toLowerCase())
+
+  // prepare another array with the letters sorted
   const sortedFirstLetters = [...firstLetters].sort()
 
   // check to see if all words are in alphabetical order
   for (var i = 0; i < firstLetters.length; ++i) {
     if (firstLetters[i] !== sortedFirstLetters[i]) return false
   }
+
+  // Huzzah! It's a match.
+
   // This logs the text of every post off the firehose that matches.
   // Just for fun :)
   console.log(text)
