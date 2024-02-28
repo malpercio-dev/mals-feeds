@@ -4,6 +4,7 @@ import { AppContext } from '../config'
 import { Record } from '../lexicon/types/app/bsky/feed/post'
 import { CreateOp } from '../util/subscription'
 import { Post } from '../db/schema'
+import { isSelfLabels } from '../lexicon/types/com/atproto/label/defs'
 
 // max 15 chars
 export const shortname = 'alphabeticwords'
@@ -14,17 +15,26 @@ export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
   // only top-level posts
   if (create.record.reply) return false
 
+  // filter out anything labelled as nsfw etc
+  if (isSelfLabels(create.record.labels)) {
+    if (create.record.labels.values.some(v => v.val === 'porn' || v.val === 'sexual')) return false
+  }
+
+  // filter out nsfw etc hashtags
+  if (text.includes("#NSFW") || text.includes("#nsfw") || text.includes("#BDSM") || text.includes("#bdsm") || text.includes("#KINK") || text.includes("#kink")) return false
+
   // only allow ASCII for simplicity
-  if (!isASCII(text, true)) return false
+  if (!isASCII(text, false)) return false
 
   const words = text.toLowerCase().split(" ")
 
   // we only want sentences, not single words
   if (words.length <= 1) return false
 
-  // check to see if all words are in alphabetical order
   const firstLetters = words.map(word => word.substring(0, 1))
   const sortedFirstLetters = [...firstLetters].sort()
+
+  // check to see if all words are in alphabetical order
   for (var i = 0; i < firstLetters.length; ++i) {
     if (firstLetters[i] !== sortedFirstLetters[i]) return false
   }
