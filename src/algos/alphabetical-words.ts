@@ -20,7 +20,7 @@ export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
 
   // filter out anything labelled as nsfw etc
   if (isSelfLabels(create.record.labels)) {
-    if (create.record.labels.values.some(v => v.val === 'porn' || v.val === 'sexual')) {
+    if (create.record.labels.values.some(v => v.val === 'porn' || v.val === 'sexual' || v.val === 'nudity')) {
       // console.log("contains nsfw labels")
       return false
     }
