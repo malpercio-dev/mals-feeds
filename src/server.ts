@@ -10,6 +10,10 @@ import { FirehoseSubscription } from './subscription'
 import { AppContext, Config } from './config'
 import wellKnown from './well-known'
 import { SubscriptionWorkers } from './subscriptionWorkers'
+import { ExpressAdapter } from '@bull-board/express'
+import { createBullBoard } from '@bull-board/api'
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
+import { Queue } from 'bullmq'
 
 export class FeedGenerator {
   public app: express.Application
@@ -36,7 +40,15 @@ export class FeedGenerator {
   static create(cfg: Config) {
     const app = express()
     const db = createDb(cfg.sqliteLocation)
-    const firehose = new FirehoseSubscription(db, cfg.subscriptionEndpoint)
+
+    const deletesQueue = new Queue('deletes')
+    const createsQueue = new Queue('creates')
+    const firehose = new FirehoseSubscription(
+      db,
+      cfg.subscriptionEndpoint,
+      deletesQueue,
+      createsQueue,
+    )
 
     const didCache = new MemoryCache()
     const didResolver = new DidResolver({
@@ -61,6 +73,24 @@ export class FeedGenerator {
     describeGenerator(server, ctx)
     app.use(server.xrpc.router)
     app.use(wellKnown(ctx))
+
+    const serverAdapter = new ExpressAdapter()
+    serverAdapter.setBasePath('/admin/queues')
+
+    createBullBoard({
+      queues: [
+        new BullMQAdapter(deletesQueue, { readOnlyMode: true }),
+        new BullMQAdapter(createsQueue, { readOnlyMode: true }),
+      ],
+      serverAdapter: serverAdapter,
+      options: {
+        uiConfig: {
+          boardTitle: "Mal's Feeds",
+        },
+      },
+    })
+
+    app.use('/admin/queues', serverAdapter.getRouter())
 
     const subscriptionWorkers = new SubscriptionWorkers(db)
 

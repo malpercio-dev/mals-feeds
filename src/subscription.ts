@@ -13,15 +13,13 @@ import { Record as PostRecord } from './lexicon/types/app/bsky/feed/post'
 import { Database } from './db'
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
-  deletionQueue: Queue<DeleteOp>
-  creationQueue: Queue<CreateOp<PostRecord>>
   constructor(
     public db: Database,
     public service: string,
+    public deletionQueue: Queue<DeleteOp>,
+    public creationQueue: Queue<CreateOp<PostRecord>>,
   ) {
     super(db, service)
-    this.deletionQueue = new Queue('deletes')
-    this.creationQueue = new Queue('creates')
   }
   async handleEvent(evt: RepoEvent) {
     if (!isCommit(evt)) return

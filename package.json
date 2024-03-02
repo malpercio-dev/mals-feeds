@@ -19,6 +19,7 @@
     "@atproto/repo": "^0.3.2",
     "@atproto/syntax": "^0.1.2",
     "@atproto/xrpc-server": "^0.3.2",
+    "@bull-board/express": "^5.14.2",
     "better-sqlite3": "^8.3.0",
     "bullmq": "^5.4.1",
     "dotenv": "^16.0.3",
