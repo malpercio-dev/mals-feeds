@@ -9,6 +9,7 @@ import { createDb, Database, migrateToLatest } from './db'
 import { FirehoseSubscription } from './subscription'
 import { AppContext, Config } from './config'
 import wellKnown from './well-known'
+import { SubscriptionWorkers } from './subscriptionWorkers'
 
 export class FeedGenerator {
   public app: express.Application
@@ -16,17 +17,20 @@ export class FeedGenerator {
   public db: Database
   public firehose: FirehoseSubscription
   public cfg: Config
+  public subscriptionWorkers: SubscriptionWorkers
 
   constructor(
     app: express.Application,
     db: Database,
     firehose: FirehoseSubscription,
     cfg: Config,
+    subscriptionWorkers: SubscriptionWorkers,
   ) {
     this.app = app
     this.db = db
     this.firehose = firehose
     this.cfg = cfg
+    this.subscriptionWorkers = subscriptionWorkers
   }
 
   static create(cfg: Config) {
@@ -58,7 +62,9 @@ export class FeedGenerator {
     app.use(server.xrpc.router)
     app.use(wellKnown(ctx))
 
-    return new FeedGenerator(app, db, firehose, cfg)
+    const subscriptionWorkers = new SubscriptionWorkers(db)
+
+    return new FeedGenerator(app, db, firehose, cfg, subscriptionWorkers)
   }
 
   async start(): Promise<http.Server> {
@@ -66,6 +72,7 @@ export class FeedGenerator {
     this.firehose.run(this.cfg.subscriptionReconnectDelay)
     this.server = this.app.listen(this.cfg.port, this.cfg.listenhost)
     await events.once(this.server, 'listening')
+    await this.subscriptionWorkers.initialize()
     return this.server
   }
 }

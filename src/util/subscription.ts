@@ -16,7 +16,10 @@ import { Database } from '../db'
 export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>
 
-  constructor(public db: Database, public service: string) {
+  constructor(
+    public db: Database,
+    public service: string,
+  ) {
     this.sub = new Subscription({
       service: service,
       method: ids.ComAtprotoSyncSubscribeRepos,
@@ -47,7 +50,10 @@ export abstract class FirehoseSubscriptionBase {
       }
     } catch (err) {
       console.error('repo subscription errored', err)
-      setTimeout(() => this.run(subscriptionReconnectDelay), subscriptionReconnectDelay)
+      setTimeout(
+        () => this.run(subscriptionReconnectDelay),
+        subscriptionReconnectDelay,
+      )
     }
   }
 
@@ -136,7 +142,7 @@ export type CreateOp<T> = {
   record: T
 }
 
-type DeleteOp = {
+export type DeleteOp = {
   uri: string
 }
 
@@ -178,9 +184,12 @@ const fixBlobRefs = (obj: unknown): unknown => {
       const blob = obj as BlobRef
       return new BlobRef(blob.ref, blob.mimeType, blob.size, blob.original)
     }
-    return Object.entries(obj).reduce((acc, [key, val]) => {
-      return Object.assign(acc, { [key]: fixBlobRefs(val) })
-    }, {} as Record<string, unknown>)
+    return Object.entries(obj).reduce(
+      (acc, [key, val]) => {
+        return Object.assign(acc, { [key]: fixBlobRefs(val) })
+      },
+      {} as Record<string, unknown>,
+    )
   }
   return obj
 }

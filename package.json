@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "publishFeed": "ts-node scripts/publishFeedGen.ts",
-    "start": "ts-node src/index.ts",
+    "start": "node ./dist/index.js",
+    "dev": "tsc-watch --onSuccess \"node ./dist/index.js\"",
     "build": "tsc"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@atproto/syntax": "^0.1.2",
     "@atproto/xrpc-server": "^0.3.2",
     "better-sqlite3": "^8.3.0",
+    "bullmq": "^5.4.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "kysely": "^0.22.0",
@@ -29,6 +31,7 @@
     "@types/express": "^4.17.17",
     "@types/node": "^20.1.2",
     "ts-node": "^10.9.1",
+    "tsc-watch": "^6.0.4",
     "typescript": "^5.0.4"
   }
 }
