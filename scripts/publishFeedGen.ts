@@ -25,7 +25,8 @@ const run = async () => {
 
   // (Optional) A description of your feed
   // Ex: Top trending content from the whole network
-  const description = 'Posts where all words are in alphabetical order (only ASCII text, more than 1 word)'
+  const description =
+    'Posts where all words are in alphabetical order. Only ASCII text, must have at least two words (one whitespace character). Best attempt to remove NSFW content. See source at https://github.com/malpercio-dev/mals-feeds.'
 
   // (Optional) The path to an image to be used as your feed's avatar
   // Ex: ~/path/to/avatar.jpeg
