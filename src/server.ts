@@ -41,8 +41,23 @@ export class FeedGenerator {
     const app = express()
     const db = createDb(cfg.sqliteLocation)
 
-    const deletesQueue = new Queue('deletes')
-    const createsQueue = new Queue('creates')
+    const queueOpts = {
+      autorun: true,
+      connection: {
+        host: cfg.redis.host,
+        port: cfg.redis.port,
+      },
+      removeOnComplete: {
+        age: 3600, // keep up to 1 hour
+        count: 1000, // keep up to 1000 jobs
+      },
+      removeOnFail: {
+        age: 24 * 3600, // keep up to 24 hours
+      },
+    }
+
+    const deletesQueue = new Queue('deletes', queueOpts)
+    const createsQueue = new Queue('creates', queueOpts)
     const firehose = new FirehoseSubscription(
       db,
       cfg.subscriptionEndpoint,
