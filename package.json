@@ -8,6 +8,7 @@
   "license": "MIT",
   "scripts": {
     "publishFeed": "ts-node scripts/publishFeedGen.ts",
+    "unpublishFeed": "ts-node scripts/unpublishFeedGen.ts",
     "start": "node ./dist/index.js",
     "dev": "tsc-watch --onSuccess \"node ./dist/index.js\"",
     "build": "tsc"
