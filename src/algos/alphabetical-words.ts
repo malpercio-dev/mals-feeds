@@ -38,7 +38,7 @@ export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
     return false
   }
 
-  const words = text.toLowerCase().split(" ")
+  const words = text.toLowerCase().split(/[\s,]+/)
 
   // we only want sentences, not single words
   if (words.length <= 1) {
@@ -75,6 +75,8 @@ export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
   // This logs the text of every post off the firehose that matches.
   // Just for fun :)
   console.log(text)
+  console.log(create.author)
+  console.log(create.cid)
   return true
 }
 
