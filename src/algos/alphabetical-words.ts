@@ -38,7 +38,9 @@ export const subscriptionFilter = (create: CreateOp<Record>): boolean => {
     return false
   }
 
-  const words = text.toLowerCase().split(/[\s,]+/)
+  // Split on whitespace to find each word.
+  // Remove any element that is an empty string (eg splitting the string " ")
+  const words = text.toLowerCase().split(/[\s,]+/).filter(s => s !== '')
 
   // we only want sentences, not single words
   if (words.length <= 1) {
